@@ -1,4 +1,4 @@
-package org.pytorch.demo.objectdetection
+package com.limurse.objectdetection
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -8,16 +8,15 @@ import android.graphics.Rect
 import android.graphics.YuvImage
 import android.media.Image
 import android.util.Log
-import android.view.TextureView
-import android.view.View
-import android.view.ViewStub
 import androidx.annotation.WorkerThread
 import androidx.camera.core.ImageProxy
+import androidx.camera.view.PreviewView
 import org.pytorch.IValue
 import org.pytorch.LiteModuleLoader
 import org.pytorch.Module
-import org.pytorch.demo.objectdetection.ObjectDetectionActivity.AnalysisResult
-import org.pytorch.demo.objectdetection.PrePostProcessor.outputsToNMSPredictions
+import com.limurse.objectdetection.ObjectDetectionActivity.AnalysisResult
+import com.limurse.objectdetection.PrePostProcessor.outputsToNMSPredictions
+import org.pytorch.demo.objectdetection.R
 import org.pytorch.torchvision.TensorImageUtils
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -26,19 +25,18 @@ class ObjectDetectionActivity : AbstractCameraXActivity<AnalysisResult?>() {
     private var mModule: Module? = null
     private var mResultView: ResultView? = null
 
-    class AnalysisResult(val mResults: ArrayList<Result>)
+    data class AnalysisResult(val mResults: ArrayList<Result>)
 
     override val contentViewLayoutId: Int
-        protected get() = R.layout.activity_object_detection
-    override val cameraPreviewTextureView: TextureView
-        protected get() {
+        get() = R.layout.activity_object_detection
+    override val cameraPreviewView: PreviewView
+        get() {
             mResultView = findViewById(R.id.resultView)
-            return (findViewById<View>(R.id.object_detection_texture_view_stub) as ViewStub)
-                .inflate()
-                .findViewById(R.id.object_detection_texture_view)
+            return findViewById(R.id.cameraPreviewView)
         }
 
     override fun applyToUiAnalyzeImageResult(result: AnalysisResult?) {
+        Log.d("ObjectDetectionActivity", "Applying results to UI ${result?.mResults}")
         mResultView!!.setResults(result?.mResults)
         mResultView!!.invalidate()
     }
@@ -63,7 +61,8 @@ class ObjectDetectionActivity : AbstractCameraXActivity<AnalysisResult?>() {
     }
 
     @WorkerThread
-    override fun analyzeImage(image: ImageProxy?, rotationDegrees: Int): AnalysisResult? {
+    @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
+    override fun analyzeImage(image: ImageProxy, rotationDegrees: Int): AnalysisResult? {
         try {
             if (mModule == null) {
                 mModule = LiteModuleLoader.load(
@@ -77,7 +76,7 @@ class ObjectDetectionActivity : AbstractCameraXActivity<AnalysisResult?>() {
             Log.e("Object Detection", "Error reading assets", e)
             return null
         }
-        var bitmap = imgToBitmap(image!!.image)
+        var bitmap = imgToBitmap(image.image)
         val matrix = Matrix()
         matrix.postRotate(90.0f)
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)

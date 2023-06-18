@@ -1,4 +1,4 @@
-package org.pytorch.demo.objectdetection
+package com.limurse.objectdetection
 
 import android.graphics.Rect
 

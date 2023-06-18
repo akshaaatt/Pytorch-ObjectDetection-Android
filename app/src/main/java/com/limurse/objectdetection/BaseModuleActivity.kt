@@ -1,9 +1,4 @@
-// Copyright (c) 2020 Facebook, Inc. and its affiliates.
-// All rights reserved.
-//
-// This source code is licensed under the BSD-style license found in the
-// LICENSE file in the root directory of this source tree.
-package org.pytorch.demo.objectdetection
+package com.limurse.objectdetection
 
 import android.os.Bundle
 import android.os.Handler
@@ -12,10 +7,11 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 
 open class BaseModuleActivity : AppCompatActivity() {
-    protected var mBackgroundThread: HandlerThread? = null
+    var mBackgroundThread: HandlerThread? = null
     @JvmField
     protected var mBackgroundHandler: Handler? = null
-    protected var mUIHandler: Handler? = null
+    var mUIHandler: Handler? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mUIHandler = Handler(mainLooper)
@@ -37,7 +33,7 @@ open class BaseModuleActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    protected fun stopBackgroundThread() {
+    fun stopBackgroundThread() {
         mBackgroundThread!!.quitSafely()
         try {
             mBackgroundThread!!.join()

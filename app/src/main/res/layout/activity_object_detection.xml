@@ -6,16 +6,15 @@
     android:background="@android:color/black"
     android:fitsSystemWindows="true">
 
-    <ViewStub
-        android:id="@+id/object_detection_texture_view_stub"
+    <androidx.camera.view.PreviewView
+        android:id="@+id/cameraPreviewView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout="@layout/texture_view"
         app:layout_constraintBottom_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <org.pytorch.demo.objectdetection.ResultView
+    <com.limurse.objectdetection.ResultView
         android:id="@+id/resultView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -24,6 +23,5 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

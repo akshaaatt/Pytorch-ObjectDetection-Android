@@ -1,4 +1,4 @@
-package org.pytorch.demo.objectdetection
+package com.limurse.objectdetection
 
 import android.Manifest
 import android.content.Context
@@ -21,7 +21,8 @@ import androidx.core.content.ContextCompat
 import org.pytorch.IValue
 import org.pytorch.LiteModuleLoader
 import org.pytorch.Module
-import org.pytorch.demo.objectdetection.PrePostProcessor.outputsToNMSPredictions
+import com.limurse.objectdetection.PrePostProcessor.outputsToNMSPredictions
+import org.pytorch.demo.objectdetection.R
 import org.pytorch.torchvision.TensorImageUtils
 import java.io.BufferedReader
 import java.io.File
