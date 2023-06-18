@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity(), Runnable {
         }
         mButtonDetect = findViewById(R.id.detectButton)
         mProgressBar = findViewById<View>(R.id.progressBar) as ProgressBar
-        mButtonDetect?.setOnClickListener(View.OnClickListener {
+        mButtonDetect?.setOnClickListener {
             mButtonDetect?.isEnabled = false
             mProgressBar!!.visibility = ProgressBar.VISIBLE
             mButtonDetect?.text = getString(R.string.run_model)
@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity(), Runnable {
             mStartY = (mImageView!!.height - mIvScaleY * mBitmap!!.height) / 2
             val thread = Thread(this@MainActivity)
             thread.start()
-        })
+        }
         try {
             mModule = LiteModuleLoader.load(assetFilePath(applicationContext, "yolov5s.torchscript.ptl"))
             val br = BufferedReader(InputStreamReader(assets.open("classes.txt")))

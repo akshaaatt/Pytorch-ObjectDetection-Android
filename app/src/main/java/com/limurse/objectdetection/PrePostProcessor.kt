@@ -1,25 +1,17 @@
-// Copyright (c) 2020 Facebook, Inc. and its affiliates.
-// All rights reserved.
-//
-// This source code is licensed under the BSD-style license found in the
-// LICENSE file in the root directory of this source tree.
 package com.limurse.objectdetection
 
 import android.graphics.Rect
 import java.util.Arrays
-import java.util.Collections
+import kotlin.math.max
+import kotlin.math.min
 
 object PrePostProcessor {
     // for yolov5 model, no need to apply MEAN and STD
-    @JvmField
     var NO_MEAN_RGB = floatArrayOf(0.0f, 0.0f, 0.0f)
-    @JvmField
     var NO_STD_RGB = floatArrayOf(1.0f, 1.0f, 1.0f)
 
     // model input image size
-    @JvmField
     var mInputWidth = 640
-    @JvmField
     var mInputHeight = 640
 
     // model output is of size 25200*(num_of_class+5)
@@ -28,7 +20,6 @@ object PrePostProcessor {
     private const val mOutputColumn = 85 // left, top, right, bottom, score and 80 class probability
     private const val mThreshold = 0.30f // score above which a detection is generated
     private const val mNmsLimit = 15
-    @JvmField
     var mClasses: Array<String?> = ArrayList<String>().toTypedArray()
     // The two methods nonMaxSuppression and IOU below are ported from https://github.com/hollance/YOLO-CoreML-MPSNNGraph/blob/master/Common/Helpers.swift
     /**
@@ -46,9 +37,7 @@ object PrePostProcessor {
     ): ArrayList<Result> {
 
         // Do an argsort on the confidence scores, from high to low.
-        Collections.sort(
-            boxes
-        ) { o1, o2 -> o1.score.compareTo(o2.score) }
+        boxes.sortWith { o1, o2 -> o1.score.compareTo(o2.score) }
         val selected = ArrayList<Result>()
         val active = BooleanArray(boxes.size)
         Arrays.fill(active, true)
@@ -93,12 +82,12 @@ object PrePostProcessor {
         if (areaA <= 0.0) return 0.0f
         val areaB = ((b.right - b.left) * (b.bottom - b.top)).toFloat()
         if (areaB <= 0.0) return 0.0f
-        val intersectionMinX = Math.max(a.left, b.left).toFloat()
-        val intersectionMinY = Math.max(a.top, b.top).toFloat()
-        val intersectionMaxX = Math.min(a.right, b.right).toFloat()
-        val intersectionMaxY = Math.min(a.bottom, b.bottom).toFloat()
-        val intersectionArea = Math.max(intersectionMaxY - intersectionMinY, 0f) *
-                Math.max(intersectionMaxX - intersectionMinX, 0f)
+        val intersectionMinX = max(a.left, b.left).toFloat()
+        val intersectionMinY = max(a.top, b.top).toFloat()
+        val intersectionMaxX = min(a.right, b.right).toFloat()
+        val intersectionMaxY = min(a.bottom, b.bottom).toFloat()
+        val intersectionArea = max(intersectionMaxY - intersectionMinY, 0f) *
+                max(intersectionMaxX - intersectionMinX, 0f)
         return intersectionArea / (areaA + areaB - intersectionArea)
     }
 
