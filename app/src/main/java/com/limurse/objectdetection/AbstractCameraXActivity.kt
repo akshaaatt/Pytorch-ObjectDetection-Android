@@ -56,14 +56,14 @@ abstract class AbstractCameraXActivity<R> : BaseModuleActivity(), LifecycleOwner
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, ImageAnalysis.Analyzer { image ->
+                    it.setAnalyzer(cameraExecutor) { image ->
                         val rotationDegrees = image.imageInfo.rotationDegrees
                         val result = analyzeImage(image, rotationDegrees)
                         if (result != null) {
                             runOnUiThread { applyToUiAnalyzeImageResult(result) }
                         }
                         image.close()
-                    })
+                    }
                 }
 
             try {
@@ -102,13 +102,16 @@ abstract class AbstractCameraXActivity<R> : BaseModuleActivity(), LifecycleOwner
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) {
-                startCamera()
-            } else {
-                Toast.makeText(this,
-                    "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT).show()
-                finish()
+            when {
+                allPermissionsGranted() -> {
+                    startCamera()
+                }
+                else -> {
+                    Toast.makeText(this,
+                        "Permissions not granted by the user.",
+                        Toast.LENGTH_SHORT).show()
+                    finish()
+                }
             }
         }
     }

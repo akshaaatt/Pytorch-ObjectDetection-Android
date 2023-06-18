@@ -8,8 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 open class BaseModuleActivity : AppCompatActivity() {
     var mBackgroundThread: HandlerThread? = null
-    @JvmField
-    protected var mBackgroundHandler: Handler? = null
+    var mBackgroundHandler: Handler? = null
     var mUIHandler: Handler? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,9 +21,9 @@ open class BaseModuleActivity : AppCompatActivity() {
         startBackgroundThread()
     }
 
-    protected fun startBackgroundThread() {
+    private fun startBackgroundThread() {
         mBackgroundThread = HandlerThread("ModuleActivity")
-        mBackgroundThread!!.start()
+        mBackgroundThread?.start()
         mBackgroundHandler = Handler(mBackgroundThread!!.looper)
     }
 
@@ -33,10 +32,10 @@ open class BaseModuleActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    fun stopBackgroundThread() {
-        mBackgroundThread!!.quitSafely()
+    private fun stopBackgroundThread() {
+        mBackgroundThread?.quitSafely()
         try {
-            mBackgroundThread!!.join()
+            mBackgroundThread?.join()
             mBackgroundThread = null
             mBackgroundHandler = null
         } catch (e: InterruptedException) {
