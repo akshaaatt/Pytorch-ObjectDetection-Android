@@ -1,4 +1,4 @@
-package com.limurse.objectdetection
+package com.limurse.objectdetection.model
 
 import android.graphics.Rect
 

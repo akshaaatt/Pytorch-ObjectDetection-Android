@@ -1,4 +1,4 @@
-package com.limurse.objectdetection
+package com.limurse.objectdetection.ui
 
 import android.os.Bundle
 import android.os.Handler

@@ -1,4 +1,4 @@
-package com.limurse.objectdetection
+package com.limurse.objectdetection.ui
 
 import android.Manifest
 import android.content.Context
@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -14,10 +15,12 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.limurse.objectdetection.PrePostProcessor
 import org.pytorch.IValue
 import org.pytorch.LiteModuleLoader
 import org.pytorch.Module
@@ -78,7 +81,7 @@ class MainActivity : AppCompatActivity(), Runnable {
         mResultView = findViewById(R.id.resultView)
         mResultView?.visibility = View.INVISIBLE
         val buttonTest = findViewById<Button>(R.id.testButton)
-        buttonTest.text = ("Test Image 1/3")
+        buttonTest.text = "Test Image 1/3"
         buttonTest.setOnClickListener {
             mResultView?.visibility = View.INVISIBLE
             mImageIndex = (mImageIndex + 1) % mTestImages.size
@@ -95,20 +98,13 @@ class MainActivity : AppCompatActivity(), Runnable {
         buttonSelect.setOnClickListener {
             mResultView?.visibility = View.INVISIBLE
             val options = arrayOf<CharSequence>("Choose from Photos", "Take Picture", "Cancel")
-            val builder = AlertDialog.Builder(this@MainActivity)
+            val builder = AlertDialog.Builder(this)
             builder.setTitle("New Test Image")
             builder.setItems(options) { dialog, item ->
-                if ((options[item] == "Take Picture")) {
-                    val takePicture = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    startActivityForResult(takePicture, 0)
-                } else if ((options[item] == "Choose from Photos")) {
-                    val pickPhoto = Intent(
-                        Intent.ACTION_PICK,
-                        MediaStore.Images.Media.INTERNAL_CONTENT_URI
-                    )
-                    startActivityForResult(pickPhoto, 1)
-                } else if ((options[item] == "Cancel")) {
-                    dialog.dismiss()
+                when (options[item]) {
+                    "Take Picture" -> takePicture.launch(null)
+                    "Choose from Photos" -> getContent.launch("image/*")
+                    "Cancel" -> dialog.dismiss()
                 }
             }
             builder.show()
@@ -157,55 +153,43 @@ class MainActivity : AppCompatActivity(), Runnable {
 
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != RESULT_CANCELED) {
-            when (requestCode) {
-                0 -> if (resultCode == RESULT_OK && data != null) {
-                    mBitmap = data.extras!!["data"] as Bitmap?
-                    val matrix = Matrix()
-                    matrix.postRotate(90.0f)
-                    mBitmap = Bitmap.createBitmap(
-                        (mBitmap)!!,
-                        0,
-                        0,
-                        mBitmap!!.width,
-                        mBitmap!!.height,
-                        matrix,
-                        true
-                    )
-                    mImageView!!.setImageBitmap(mBitmap)
-                }
+    private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
+        bitmap?.let {
+            val matrix = Matrix()
+            matrix.postRotate(90.0f)
+            mBitmap = Bitmap.createBitmap(
+                it,
+                0,
+                0,
+                it.width,
+                it.height,
+                matrix,
+                true
+            )
+            mImageView?.setImageBitmap(mBitmap)
+        }
+    }
 
-                1 -> if (resultCode == RESULT_OK && data != null) {
-                    val selectedImage = data.data
-                    val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
-                    if (selectedImage != null) {
-                        val cursor = contentResolver.query(
-                            selectedImage,
-                            filePathColumn, null, null, null
-                        )
-                        if (cursor != null) {
-                            cursor.moveToFirst()
-                            val columnIndex = cursor.getColumnIndex(filePathColumn[0])
-                            val picturePath = cursor.getString(columnIndex)
-                            mBitmap = BitmapFactory.decodeFile(picturePath)
-                            val matrix = Matrix()
-                            matrix.postRotate(90.0f)
-                            mBitmap = Bitmap.createBitmap(
-                                mBitmap!!,
-                                0,
-                                0,
-                                mBitmap!!.width,
-                                mBitmap!!.height,
-                                matrix,
-                                true
-                            )
-                            mImageView!!.setImageBitmap(mBitmap)
-                            cursor.close()
-                        }
-                    }
-                }
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
+        uri?.let {
+            contentResolver.query(it, filePathColumn, null, null, null)?.use { cursor ->
+                cursor.moveToFirst()
+                val columnIndex = cursor.getColumnIndex(filePathColumn[0])
+                val picturePath = cursor.getString(columnIndex)
+                mBitmap = BitmapFactory.decodeFile(picturePath)
+                val matrix = Matrix()
+                matrix.postRotate(90.0f)
+                mBitmap = Bitmap.createBitmap(
+                    mBitmap!!,
+                    0,
+                    0,
+                    mBitmap!!.width,
+                    mBitmap!!.height,
+                    matrix,
+                    true
+                )
+                mImageView?.setImageBitmap(mBitmap)
             }
         }
     }

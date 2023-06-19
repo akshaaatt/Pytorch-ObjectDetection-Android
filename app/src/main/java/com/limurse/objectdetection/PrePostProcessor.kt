@@ -1,6 +1,7 @@
 package com.limurse.objectdetection
 
 import android.graphics.Rect
+import com.limurse.objectdetection.model.Result
 import java.util.Arrays
 import kotlin.math.max
 import kotlin.math.min

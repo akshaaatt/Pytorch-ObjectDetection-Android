@@ -1,4 +1,4 @@
-package com.limurse.objectdetection
+package com.limurse.objectdetection.ui
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -11,11 +11,13 @@ import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.PreviewView
+import com.limurse.objectdetection.PrePostProcessor
 import org.pytorch.IValue
 import org.pytorch.LiteModuleLoader
 import org.pytorch.Module
-import com.limurse.objectdetection.ObjectDetectionActivity.AnalysisResult
+import com.limurse.objectdetection.ui.ObjectDetectionActivity.AnalysisResult
 import com.limurse.objectdetection.PrePostProcessor.outputsToNMSPredictions
+import com.limurse.objectdetection.model.Result
 import org.pytorch.demo.objectdetection.R
 import org.pytorch.torchvision.TensorImageUtils
 import java.io.ByteArrayOutputStream

@@ -1,4 +1,4 @@
-package com.limurse.objectdetection
+package com.limurse.objectdetection.ui
 
 import android.Manifest
 import android.content.pm.PackageManager

@@ -25,7 +25,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name="com.limurse.objectdetection.MainActivity"
+        <activity android:name="com.limurse.objectdetection.ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,7 +33,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.limurse.objectdetection.ObjectDetectionActivity" />
+        <activity android:name="com.limurse.objectdetection.ui.ObjectDetectionActivity" />
     </application>
 
 </manifest>
