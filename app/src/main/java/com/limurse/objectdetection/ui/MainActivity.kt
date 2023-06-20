@@ -13,7 +13,6 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -21,11 +20,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.limurse.objectdetection.PrePostProcessor
+import com.limurse.objectdetection.PrePostProcessor.outputsToNMSPredictions
 import org.pytorch.IValue
 import org.pytorch.LiteModuleLoader
 import org.pytorch.Module
-import com.limurse.objectdetection.PrePostProcessor.outputsToNMSPredictions
 import org.pytorch.demo.objectdetection.R
+import org.pytorch.demo.objectdetection.databinding.ActivityMainBinding
 import org.pytorch.torchvision.TensorImageUtils
 import java.io.BufferedReader
 import java.io.File
@@ -36,10 +36,7 @@ import java.io.InputStreamReader
 class MainActivity : AppCompatActivity(), Runnable {
     private var mImageIndex = 0
     private val mTestImages = arrayOf("test1.png", "test2.jpg", "test3.png")
-    private var mImageView: ImageView? = null
-    private var mResultView: ResultView? = null
-    private var mButtonDetect: Button? = null
-    private var mProgressBar: ProgressBar? = null
+    private lateinit var binding: ActivityMainBinding
     private var mBitmap: Bitmap? = null
     private var mModule: Module? = null
     private var mImgScaleX = 0f
@@ -69,26 +66,24 @@ class MainActivity : AppCompatActivity(), Runnable {
         ) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1)
         }
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         try {
             mBitmap = BitmapFactory.decodeStream(assets.open(mTestImages[mImageIndex]))
         } catch (e: IOException) {
             Log.e("Object Detection", "Error reading assets", e)
             finish()
         }
-        mImageView = findViewById(R.id.imageView)
-        mImageView?.setImageBitmap(mBitmap)
-        mResultView = findViewById(R.id.resultView)
-        mResultView?.visibility = View.INVISIBLE
-        val buttonTest = findViewById<Button>(R.id.testButton)
-        buttonTest.text = "Test Image 1/3"
-        buttonTest.setOnClickListener {
-            mResultView?.visibility = View.INVISIBLE
+        binding.imageView.setImageBitmap(mBitmap)
+        binding.resultView.visibility = View.INVISIBLE
+        binding.testButton.text = "Test Image 1/3"
+        binding.testButton.setOnClickListener {
+            binding.resultView.visibility = View.INVISIBLE
             mImageIndex = (mImageIndex + 1) % mTestImages.size
-            buttonTest.text = String.format("Text Image %d/%d", mImageIndex + 1, mTestImages.size)
+            binding.testButton.text = String.format("Text Image %d/%d", mImageIndex + 1, mTestImages.size)
             try {
                 mBitmap = BitmapFactory.decodeStream(assets.open(mTestImages[mImageIndex]))
-                mImageView?.setImageBitmap(mBitmap)
+                binding.imageView.setImageBitmap(mBitmap)
             } catch (e: IOException) {
                 Log.e("Object Detection", "Error reading assets", e)
                 finish()
@@ -96,7 +91,7 @@ class MainActivity : AppCompatActivity(), Runnable {
         }
         val buttonSelect = findViewById<Button>(R.id.selectButton)
         buttonSelect.setOnClickListener {
-            mResultView?.visibility = View.INVISIBLE
+            binding.resultView.visibility = View.INVISIBLE
             val options = arrayOf<CharSequence>("Choose from Photos", "Take Picture", "Cancel")
             val builder = AlertDialog.Builder(this)
             builder.setTitle("New Test Image")
@@ -114,24 +109,22 @@ class MainActivity : AppCompatActivity(), Runnable {
             val intent = Intent(this@MainActivity, ObjectDetectionActivity::class.java)
             startActivity(intent)
         }
-        mButtonDetect = findViewById(R.id.detectButton)
-        mProgressBar = findViewById<View>(R.id.progressBar) as ProgressBar
-        mButtonDetect?.setOnClickListener {
-            mButtonDetect?.isEnabled = false
-            mProgressBar!!.visibility = ProgressBar.VISIBLE
-            mButtonDetect?.text = getString(R.string.run_model)
+         binding.detectButton.setOnClickListener {
+             binding.detectButton.isEnabled = false
+             binding.progressBar.visibility = ProgressBar.VISIBLE
+             binding.detectButton.text = getString(R.string.run_model)
             mImgScaleX = mBitmap!!.width.toFloat() / PrePostProcessor.mInputWidth
             mImgScaleY = mBitmap!!.height.toFloat() / PrePostProcessor.mInputHeight
             mIvScaleX = (when {
-                mBitmap!!.width > mBitmap!!.height -> mImageView?.width!!.toFloat() / mBitmap!!.width
-                else -> mImageView?.height!!.toFloat() / mBitmap!!.height
+                mBitmap!!.width > mBitmap!!.height -> binding.imageView.width.toFloat() / mBitmap!!.width
+                else -> binding.imageView.height.toFloat() / mBitmap!!.height
             })
             mIvScaleY = (when {
-                mBitmap!!.height > mBitmap!!.width -> mImageView?.height!!.toFloat() / mBitmap!!.height
-                else -> mImageView?.width!!.toFloat() / mBitmap!!.width
+                mBitmap!!.height > mBitmap!!.width -> binding.imageView.height.toFloat() / mBitmap!!.height
+                else -> binding.imageView.width.toFloat() / mBitmap!!.width
             })
-            mStartX = (mImageView!!.width - mIvScaleX * mBitmap!!.width) / 2
-            mStartY = (mImageView!!.height - mIvScaleY * mBitmap!!.height) / 2
+            mStartX = (binding.imageView.width - mIvScaleX * mBitmap!!.width) / 2
+            mStartY = (binding.imageView.height - mIvScaleY * mBitmap!!.height) / 2
             val thread = Thread(this@MainActivity)
             thread.start()
         }
@@ -166,7 +159,7 @@ class MainActivity : AppCompatActivity(), Runnable {
                 matrix,
                 true
             )
-            mImageView?.setImageBitmap(mBitmap)
+            binding.imageView.setImageBitmap(mBitmap)
         }
     }
 
@@ -189,7 +182,7 @@ class MainActivity : AppCompatActivity(), Runnable {
                     matrix,
                     true
                 )
-                mImageView?.setImageBitmap(mBitmap)
+                binding.imageView.setImageBitmap(mBitmap)
             }
         }
     }
@@ -219,12 +212,12 @@ class MainActivity : AppCompatActivity(), Runnable {
             mStartY
         )
         runOnUiThread {
-            mButtonDetect!!.isEnabled = true
-            mButtonDetect!!.text = getString(R.string.detect)
-            mProgressBar!!.visibility = ProgressBar.INVISIBLE
-            mResultView!!.setResults(results)
-            mResultView!!.invalidate()
-            mResultView!!.visibility = View.VISIBLE
+             binding.detectButton.isEnabled = true
+             binding.detectButton.text = getString(R.string.detect)
+             binding.progressBar.visibility = ProgressBar.INVISIBLE
+            binding.resultView.setResults(results)
+            binding.resultView.invalidate()
+            binding.resultView.visibility = View.VISIBLE
         }
     }
 

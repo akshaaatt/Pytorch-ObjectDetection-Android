@@ -39,8 +39,8 @@ class ObjectDetectionActivity : AbstractCameraXActivity<AnalysisResult?>() {
 
     override fun applyToUiAnalyzeImageResult(result: AnalysisResult?) {
         Log.d("ObjectDetectionActivity", "Applying results to UI ${result?.mResults}")
-        mResultView!!.setResults(result?.mResults)
-        mResultView!!.invalidate()
+        binding.resultView.setResults(result?.mResults)
+        binding.resultView.invalidate()
     }
 
     private fun imgToBitmap(image: Image?): Bitmap {
@@ -98,8 +98,8 @@ class ObjectDetectionActivity : AbstractCameraXActivity<AnalysisResult?>() {
         val outputs = outputTensor.dataAsFloatArray
         val imgScaleX = bitmap.width.toFloat() / PrePostProcessor.mInputWidth
         val imgScaleY = bitmap.height.toFloat() / PrePostProcessor.mInputHeight
-        val ivScaleX = mResultView!!.width.toFloat() / bitmap.width
-        val ivScaleY = mResultView!!.height.toFloat() / bitmap.height
+        val ivScaleX = binding.resultView.width.toFloat() / bitmap.width
+        val ivScaleY = binding.resultView.height.toFloat() / bitmap.height
         val results =
             outputsToNMSPredictions(outputs, imgScaleX, imgScaleY, ivScaleX, ivScaleY, 0f, 0f)
         return AnalysisResult(results)
