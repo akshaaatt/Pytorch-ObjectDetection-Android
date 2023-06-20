@@ -21,6 +21,10 @@ android {
         viewBinding true
     }
 
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.4.6'
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -71,7 +75,6 @@ dependencies {
     implementation 'androidx.compose.animation:animation'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.foundation:foundation'
-    implementation 'androidx.activity:activity-compose'
 
     //Pytorch
     implementation 'org.pytorch:pytorch_android_lite:1.13.1'
